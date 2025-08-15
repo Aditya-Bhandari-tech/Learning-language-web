@@ -24,7 +24,7 @@ const register = async (req, res) => {
     });
   }
 
-  const { name, email, password, nativeLanguage } = req.body;
+  const { firstName, lastName, email, password, nativeLanguage } = req.body;
 
   try {
     // Check if user already exists
@@ -38,7 +38,8 @@ const register = async (req, res) => {
 
     // Create user
     const user = await User.create({
-      name,
+      firstName,
+      lastName,
       email,
       password,
       nativeLanguage: nativeLanguage || 'English'
@@ -177,9 +178,10 @@ const updateProfile = async (req, res) => {
 
   try {
     const updateData = {};
-    const { name, nativeLanguage, preferences } = req.body;
+    const { firstName, lastName, nativeLanguage, preferences } = req.body;
 
-    if (name) updateData.name = name;
+    if (firstName) updateData.firstName = firstName;
+    if (lastName) updateData.lastName = lastName;
     if (nativeLanguage) updateData.nativeLanguage = nativeLanguage;
     if (preferences) updateData.preferences = { ...req.user.preferences, ...preferences };
 

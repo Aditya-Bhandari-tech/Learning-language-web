@@ -4,8 +4,8 @@ import { useLearning } from '../contexts/LearningContext';
 import '../styles/Vocabulary.css';
 
 const Vocabulary = () => {
-  const { user } = useAuth();
-  const { updateProgress } = useLearning();
+  // const { user } = useAuth(); // Will be used when implementing user-specific features
+  // const { updateProgress } = useLearning(); // Will be used when implementing progress updates
   
   const [vocabulary, setVocabulary] = useState([]);
   const [filteredVocabulary, setFilteredVocabulary] = useState([]);

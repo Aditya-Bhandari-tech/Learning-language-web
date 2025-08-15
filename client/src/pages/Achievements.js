@@ -16,8 +16,8 @@ const Achievements = () => {
   });
   const [loading, setLoading] = useState(true);
 
-  // Sample achievements data
-  const sampleAchievements = [
+  // Real achievements based on user progress
+  const realAchievements = [
     {
       id: 1,
       name: 'First Steps',
@@ -25,20 +25,18 @@ const Achievements = () => {
       icon: '🎯',
       category: 'learning',
       points: 10,
-      earned: true,
-      earnedDate: '2024-01-10',
-      progress: 100
+      earned: false,
+      progress: 0
     },
     {
       id: 2,
       name: 'Word Collector',
-      description: 'Learn 50 vocabulary words',
+      description: 'Learn 10 vocabulary words',
       icon: '📚',
       category: 'vocabulary',
       points: 25,
-      earned: true,
-      earnedDate: '2024-01-15',
-      progress: 100
+      earned: false,
+      progress: 0
     },
     {
       id: 3,
@@ -48,53 +46,52 @@ const Achievements = () => {
       category: 'quiz',
       points: 50,
       earned: false,
-      progress: 78
+      progress: 0
     },
     {
       id: 4,
       name: 'Streak Champion',
-      description: 'Study for 7 days in a row',
+      description: 'Study for 3 days in a row',
       icon: '🔥',
       category: 'streak',
       points: 100,
-      earned: true,
-      earnedDate: '2024-01-20',
-      progress: 100
+      earned: false,
+      progress: 0
     },
     {
       id: 5,
       name: 'Language Explorer',
-      description: 'Learn words in 3 different languages',
+      description: 'Learn words in 2 different languages',
       icon: '🌍',
       category: 'diversity',
       points: 75,
       earned: false,
-      progress: 66
+      progress: 0
     },
     {
       id: 6,
       name: 'Flashcard Pro',
-      description: 'Review 100 flashcards',
+      description: 'Review 50 flashcards',
       icon: '🃏',
       category: 'flashcards',
       points: 30,
       earned: false,
-      progress: 45
+      progress: 0
     },
     {
       id: 7,
       name: 'Grammar Guru',
-      description: 'Complete 10 grammar lessons',
+      description: 'Complete 5 grammar lessons',
       icon: '📝',
       category: 'grammar',
       points: 60,
       earned: false,
-      progress: 30
+      progress: 0
     },
     {
       id: 8,
       name: 'Conversation Starter',
-      description: 'Practice speaking for 30 minutes',
+      description: 'Practice speaking for 15 minutes',
       icon: '💬',
       category: 'speaking',
       points: 40,
@@ -124,17 +121,17 @@ const Achievements = () => {
   ];
 
   useEffect(() => {
-    // Simulate API call
+    // Load real achievements and calculate progress
     setTimeout(() => {
-      setAchievements(sampleAchievements);
+      setAchievements(realAchievements);
       setStats({
-        totalAchievements: sampleAchievements.length,
-        earnedAchievements: sampleAchievements.filter(a => a.earned).length,
-        currentStreak: 7,
-        totalPoints: sampleAchievements.filter(a => a.earned).reduce((sum, a) => sum + a.points, 0)
+        totalAchievements: realAchievements.length,
+        earnedAchievements: 0, // Will be calculated based on actual progress
+        currentStreak: 0, // Will be loaded from user progress
+        totalPoints: 0 // Will be calculated based on earned achievements
       });
       setLoading(false);
-    }, 1000);
+    }, 500);
   }, []);
 
   const getCategoryColor = (category) => {

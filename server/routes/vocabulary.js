@@ -72,6 +72,29 @@ router.get('/random/:count', [
     .withMessage('Level must be beginner, intermediate, or advanced')
 ], asyncHandler(vocabularyController.getRandomVocabulary));
 
+// @desc    Get spaced repetition vocabulary
+// @route   GET /api/vocabulary/spaced-repetition
+// @access  Private
+router.get('/spaced-repetition', authenticate, [
+  query('limit')
+    .optional()
+    .isInt({ min: 1, max: 50 })
+    .withMessage('Limit must be between 1 and 50')
+], asyncHandler(vocabularyController.getSpacedRepetitionVocabulary));
+
+// @desc    Update vocabulary progress
+// @route   PUT /api/vocabulary/:id/progress
+// @access  Private
+router.put('/:id/progress', authenticate, [
+  body('isCorrect')
+    .isBoolean()
+    .withMessage('isCorrect must be a boolean'),
+  body('difficulty')
+    .optional()
+    .isIn(['easy', 'medium', 'hard'])
+    .withMessage('Difficulty must be easy, medium, or hard')
+], asyncHandler(vocabularyController.updateVocabularyProgress));
+
 // @desc    Add vocabulary to user's favorites
 // @route   POST /api/vocabulary/:id/favorite
 // @access  Private

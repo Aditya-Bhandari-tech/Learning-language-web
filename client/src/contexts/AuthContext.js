@@ -107,7 +107,7 @@ export const AuthProvider = ({ children }) => {
       const response = await authService.login(email, password);
       
       if (response.success) {
-        dispatch({ type: AUTH_ACTIONS.LOGIN_SUCCESS, payload: response.user });
+        dispatch({ type: AUTH_ACTIONS.LOGIN_SUCCESS, payload: response.data.user });
         return { success: true };
       } else {
         dispatch({ type: AUTH_ACTIONS.SET_ERROR, payload: response.message });
@@ -129,7 +129,7 @@ export const AuthProvider = ({ children }) => {
       const response = await authService.register(userData);
       
       if (response.success) {
-        dispatch({ type: AUTH_ACTIONS.LOGIN_SUCCESS, payload: response.user });
+        dispatch({ type: AUTH_ACTIONS.LOGIN_SUCCESS, payload: response.data.user });
         return { success: true };
       } else {
         dispatch({ type: AUTH_ACTIONS.SET_ERROR, payload: response.message });
@@ -160,7 +160,7 @@ export const AuthProvider = ({ children }) => {
       const response = await authService.updateProfile(userData);
       
       if (response.success) {
-        dispatch({ type: AUTH_ACTIONS.UPDATE_USER, payload: response.user });
+        dispatch({ type: AUTH_ACTIONS.UPDATE_USER, payload: response.data.user });
         return { success: true };
       } else {
         dispatch({ type: AUTH_ACTIONS.SET_ERROR, payload: response.message });
@@ -201,7 +201,7 @@ export const AuthProvider = ({ children }) => {
       const response = await authService.addLearningLanguage(language, level);
       
       if (response.success) {
-        dispatch({ type: AUTH_ACTIONS.UPDATE_USER, payload: response.user });
+        dispatch({ type: AUTH_ACTIONS.UPDATE_USER, payload: response.data.user });
         return { success: true };
       } else {
         dispatch({ type: AUTH_ACTIONS.SET_ERROR, payload: response.message });
@@ -222,7 +222,7 @@ export const AuthProvider = ({ children }) => {
       const response = await authService.removeLearningLanguage(language);
       
       if (response.success) {
-        dispatch({ type: AUTH_ACTIONS.UPDATE_USER, payload: response.user });
+        dispatch({ type: AUTH_ACTIONS.UPDATE_USER, payload: response.data.user });
         return { success: true };
       } else {
         dispatch({ type: AUTH_ACTIONS.SET_ERROR, payload: response.message });

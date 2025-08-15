@@ -21,28 +21,30 @@ const Dashboard = () => {
     }
   }, [user, loadProgress]);
 
-  // Mock data for demonstration (would come from context/API in real app)
+  // Use real data from progress context
   const stats = {
-    streak: 7,
-    wordsLearned: 124,
-    lessonsCompleted: 18,
-    studyTimeToday: 45
+    streak: progress?.currentStreak || 0,
+    wordsLearned: progress?.statistics?.totalWords || 0,
+    lessonsCompleted: progress?.statistics?.totalSessions || 0,
+    studyTimeToday: progress?.statistics?.totalTime || 0
   };
 
-  const recentLessons = [
-    { id: 1, title: 'Basic Greetings', progress: 100, language: 'Spanish' },
-    { id: 2, title: 'Family Members', progress: 75, language: 'Spanish' },
-    { id: 3, title: 'Colors and Shapes', progress: 50, language: 'Spanish' }
-  ];
+  const recentLessons = progress?.progressRecords?.slice(0, 3).map(record => ({
+    id: record._id,
+    title: `${record.language} Session`,
+    progress: Math.round((record.correctAnswers / (record.correctAnswers + record.incorrectAnswers)) * 100) || 0,
+    language: record.language
+  })) || [];
 
-  const achievements = [
-    { id: 1, title: 'First Steps', description: 'Complete your first lesson', icon: '🎯', earned: true },
-    { id: 2, title: 'Week Warrior', description: 'Study for 7 days straight', icon: '🔥', earned: true },
-    { id: 3, title: 'Word Master', description: 'Learn 100 new words', icon: '📚', earned: true },
-    { id: 4, title: 'Consistency King', description: 'Study for 30 days straight', icon: '👑', earned: false }
-  ];
+  const achievements = progress?.achievements?.slice(0, 4).map(achievement => ({
+    id: achievement._id,
+    title: achievement.title,
+    description: achievement.description,
+    icon: '🏆',
+    earned: !!achievement.earnedAt
+  })) || [];
 
-  if (loading.progress) {
+  if (loading?.progress) {
     return (
       <div className="dashboard-loading">
         <div className="spinner"></div>
@@ -106,17 +108,17 @@ const Dashboard = () => {
               <h2 className="section-title">Continue Learning</h2>
               <div className="continue-learning-card">
                 <div className="lesson-info">
-                  <h3>Next Lesson: Numbers 1-20</h3>
-                  <p>Spanish • Beginner</p>
+                  <h3>Start Your Learning Journey</h3>
+                  <p>{user?.learningLanguages?.[0]?.language || 'Choose a language'} • {user?.learningLanguages?.[0]?.level || 'Beginner'}</p>
                   <div className="lesson-progress">
                     <div className="progress-bar">
                       <div className="progress-fill" style={{ width: '0%' }}></div>
                     </div>
-                    <span className="progress-text">0% complete</span>
+                    <span className="progress-text">Ready to begin</span>
                   </div>
                 </div>
                 <Link to="/lessons" className="btn btn-primary">
-                  Start Lesson
+                  Start Learning
                 </Link>
               </div>
             </div>
@@ -196,16 +198,16 @@ const Dashboard = () => {
                       stroke="var(--primary-color)" 
                       strokeWidth="8"
                       strokeDasharray="188.4"
-                      strokeDashoffset="94.2"
+                      strokeDashoffset="188.4"
                       strokeLinecap="round"
                     />
                   </svg>
                   <div className="goal-text">
-                    <span className="goal-number">50%</span>
+                    <span className="goal-number">0%</span>
                   </div>
                 </div>
                 <p className="goal-description">
-                  45/90 minutes studied today
+                  {stats.studyTimeToday}/{user?.preferences?.studyGoal || 15} minutes today
                 </p>
               </div>
             </div>
@@ -234,15 +236,15 @@ const Dashboard = () => {
               <h3>This Week</h3>
               <div className="weekly-stats">
                 <div className="weekly-stat">
-                  <span className="stat-value">5</span>
+                  <span className="stat-value">{stats.lessonsCompleted}</span>
                   <span className="stat-label">Lessons</span>
                 </div>
                 <div className="weekly-stat">
-                  <span className="stat-value">287</span>
+                  <span className="stat-value">{stats.studyTimeToday}</span>
                   <span className="stat-label">Minutes</span>
                 </div>
                 <div className="weekly-stat">
-                  <span className="stat-value">42</span>
+                  <span className="stat-value">{stats.wordsLearned}</span>
                   <span className="stat-label">New Words</span>
                 </div>
               </div>

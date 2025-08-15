@@ -7,11 +7,21 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/');
     setIsMenuOpen(false);
+    setShowLogoutConfirm(false);
+  };
+
+  const confirmLogout = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const cancelLogout = () => {
+    setShowLogoutConfirm(false);
   };
 
   const toggleMenu = () => {
@@ -32,7 +42,7 @@ const Navbar = () => {
         <div className="navbar-content">
           {/* Brand */}
           <Link to="/" className="navbar-brand" onClick={closeMenu}>
-            🌍 LinguaLearn
+            🌍 LangSphere
           </Link>
 
           {/* Desktop Navigation */}
@@ -91,8 +101,13 @@ const Navbar = () => {
                     </span>
                     <div className="user-level">
                       <span className="badge badge-primary text-xs">
-                        {user.learningLanguages?.[0]?.language || 'Beginner'}
+                        {user.role === 'admin' ? 'Admin' : 'Learner'}
                       </span>
+                      {user.learningLanguages?.[0]?.language && (
+                        <span className="badge badge-secondary text-xs ml-1">
+                          {user.learningLanguages[0].language}
+                        </span>
+                      )}
                     </div>
                   </div>
                   
@@ -103,14 +118,8 @@ const Navbar = () => {
                     >
                       Profile
                     </Link>
-                    <Link 
-                      to="/profile" 
-                      className={`nav-link ${isActive('/profile') ? 'active' : ''}`}
-                    >
-                      Profile
-                    </Link>
                     <button 
-                      onClick={handleLogout}
+                      onClick={confirmLogout}
                       className="btn btn-outline btn-sm"
                     >
                       Logout
@@ -170,6 +179,16 @@ const Navbar = () => {
                       <div className="font-medium">{user.firstName} {user.lastName}</div>
                       <div className="text-sm text-secondary">
                         {user.email}
+                      </div>
+                      <div className="text-xs mt-1">
+                        <span className="badge badge-primary">
+                          {user.role === 'admin' ? 'Admin' : 'Learner'}
+                        </span>
+                        {user.learningLanguages?.[0]?.language && (
+                          <span className="badge badge-secondary ml-1">
+                            {user.learningLanguages[0].language}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -236,7 +255,7 @@ const Navbar = () => {
                     👤 Profile
                   </Link>
                   <button 
-                    onClick={handleLogout}
+                    onClick={confirmLogout}
                     className="mobile-nav-link logout-btn"
                   >
                     🚪 Logout
@@ -416,7 +435,87 @@ const Navbar = () => {
             display: none !important;
           }
         }
+
+        /* Logout Confirmation Modal */
+        .logout-modal {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: rgba(0, 0, 0, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+        }
+
+        .logout-modal-content {
+          background-color: var(--bg-primary);
+          padding: var(--spacing-6);
+          border-radius: var(--radius-lg);
+          box-shadow: var(--shadow-lg);
+          max-width: 400px;
+          width: 90%;
+          text-align: center;
+        }
+
+        .logout-modal-title {
+          font-size: var(--text-lg);
+          font-weight: 600;
+          margin-bottom: var(--spacing-4);
+          color: var(--text-primary);
+        }
+
+        .logout-modal-buttons {
+          display: flex;
+          gap: var(--spacing-3);
+          justify-content: center;
+          margin-top: var(--spacing-4);
+        }
+
+        .logout-modal-btn {
+          padding: var(--spacing-3) var(--spacing-6);
+          border-radius: var(--radius-md);
+          font-weight: 500;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+        }
+
+        .logout-modal-btn.cancel {
+          background-color: var(--gray-100);
+          color: var(--text-primary);
+          border: 1px solid var(--border-color);
+        }
+
+        .logout-modal-btn.confirm {
+          background-color: var(--error-color);
+          color: var(--white);
+          border: 1px solid var(--error-color);
+        }
+
+        .logout-modal-btn:hover {
+          transform: translateY(-1px);
+        }
       `}</style>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutConfirm && (
+        <div className="logout-modal" onClick={cancelLogout}>
+          <div className="logout-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="logout-modal-title">Confirm Logout</div>
+            <p>Are you sure you want to logout?</p>
+            <div className="logout-modal-buttons">
+              <button className="logout-modal-btn cancel" onClick={cancelLogout}>
+                Cancel
+              </button>
+              <button className="logout-modal-btn confirm" onClick={handleLogout}>
+                Yes, Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 };

@@ -4,8 +4,8 @@ import { useLearning } from '../contexts/LearningContext';
 import '../styles/Progress.css';
 
 const Progress = () => {
-  const { user } = useAuth();
-  const { updateProgress } = useLearning();
+  // const { user } = useAuth(); // Will be used when implementing user-specific progress
+  // const { updateProgress } = useLearning(); // Will be used when implementing progress updates
   
   const [progressData, setProgressData] = useState({
     totalWords: 0,
@@ -67,7 +67,7 @@ const Progress = () => {
       setProgressData(sampleProgressData);
       setLoading(false);
     }, 1000);
-  }, []);
+  }, [sampleProgressData]);
 
   const getProgressPercentage = () => {
     return progressData.totalWords > 0 

@@ -5,7 +5,7 @@ import { useLearning } from '../contexts/LearningContext';
 import '../styles/Quiz.css';
 
 const Quiz = () => {
-  const { user } = useAuth();
+  // const { user } = useAuth(); // Will be used when implementing user-specific features
   const { updateProgress } = useLearning();
   const navigate = useNavigate();
   
@@ -66,9 +66,33 @@ const Quiz = () => {
       const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
       return () => clearTimeout(timer);
     } else if (timeLeft === 0 && !showResult) {
-      handleAnswer(null);
+      // Handle timeout - mark as incorrect
+      const question = questions[currentQuestion];
+      const correct = false;
+      
+      setSelectedAnswer(null);
+      setIsCorrect(false);
+      
+      setTimeout(() => {
+        if (currentQuestion < questions.length - 1) {
+          setCurrentQuestion(currentQuestion + 1);
+          setSelectedAnswer(null);
+          setIsCorrect(null);
+          setTimeLeft(30);
+        } else {
+          setShowResult(true);
+          // Update progress
+          const progressData = {
+            quizCompleted: true,
+            score: score,
+            totalQuestions: questions.length,
+            percentage: (score / questions.length) * 100
+          };
+          updateProgress(progressData);
+        }
+      }, 2000);
     }
-  }, [timeLeft, showResult]);
+  }, [timeLeft, showResult, currentQuestion, questions, score, updateProgress]);
 
   const handleAnswer = (selectedIndex) => {
     const question = questions[currentQuestion];

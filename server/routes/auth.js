@@ -10,10 +10,14 @@ const router = express.Router();
 // @route   POST /api/auth/register
 // @access  Public
 router.post('/register', [
-  body('name')
+  body('firstName')
     .trim()
-    .isLength({ min: 2, max: 50 })
-    .withMessage('Name must be between 2 and 50 characters'),
+    .isLength({ min: 2, max: 25 })
+    .withMessage('First name must be between 2 and 25 characters'),
+  body('lastName')
+    .trim()
+    .isLength({ min: 2, max: 25 })
+    .withMessage('Last name must be between 2 and 25 characters'),
   body('email')
     .isEmail()
     .normalizeEmail()
@@ -52,11 +56,16 @@ router.get('/profile', authenticate, asyncHandler(authController.getProfile));
 // @route   PUT /api/auth/profile
 // @access  Private
 router.put('/profile', authenticate, [
-  body('name')
+  body('firstName')
     .optional()
     .trim()
-    .isLength({ min: 2, max: 50 })
-    .withMessage('Name must be between 2 and 50 characters'),
+    .isLength({ min: 2, max: 25 })
+    .withMessage('First name must be between 2 and 25 characters'),
+  body('lastName')
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 25 })
+    .withMessage('Last name must be between 2 and 25 characters'),
   body('nativeLanguage')
     .optional()
     .trim()

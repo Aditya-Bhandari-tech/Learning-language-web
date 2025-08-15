@@ -540,4 +540,37 @@ progressSchema.statics.getLeaderboard = function(language, limit = 10) {
     .populate('userId', 'name avatar');
 };
 
+// Static method to get current streak
+progressSchema.statics.getCurrentStreak = function(userId, language) {
+  return this.findOne({ userId, language })
+    .then(progress => {
+      if (!progress) return 0;
+      return progress.overallProgress.currentStreak || 0;
+    });
+};
+
+// Static method to get recent achievements
+progressSchema.statics.getRecentAchievements = function(userId, limit = 5) {
+  return this.findOne({ userId })
+    .then(progress => {
+      if (!progress) return [];
+      return progress.achievements
+        .filter(achievement => achievement.unlockedAt)
+        .sort((a, b) => new Date(b.unlockedAt) - new Date(a.unlockedAt))
+        .slice(0, limit);
+    });
+};
+
+// Static method to get streak data
+progressSchema.statics.getStreakData = function(userId, language) {
+  return this.findOne({ userId, language })
+    .then(progress => {
+      if (!progress) return { current: 0, longest: 0 };
+      return {
+        current: progress.overallProgress.currentStreak || 0,
+        longest: progress.overallProgress.longestStreak || 0
+      };
+    });
+};
+
 module.exports = mongoose.model('Progress', progressSchema);

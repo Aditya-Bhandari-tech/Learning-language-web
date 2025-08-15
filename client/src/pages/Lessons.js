@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLearning } from '../contexts/LearningContext';
+import { getLessonsByLanguage, getAvailableLanguages } from '../data/lessons';
 import '../styles/Lessons.css';
 
 const Lessons = () => {
@@ -10,134 +11,24 @@ const Lessons = () => {
   const navigate = useNavigate();
   
   const [lessons, setLessons] = useState([]);
-  const [selectedLanguage, setSelectedLanguage] = useState('French');
+  const [selectedLanguage, setSelectedLanguage] = useState(user?.learningLanguages?.[0]?.language || 'Spanish');
   const [selectedLevel, setSelectedLevel] = useState('all');
   const [loading, setLoading] = useState(true);
 
-  // Sample lessons data - in a real app, this would come from the API
-  const sampleLessons = {
-    French: [
-      {
-        id: 1,
-        title: 'Basic Greetings',
-        description: 'Learn essential French greetings and introductions',
-        level: 'Beginner',
-        duration: '15 min',
-        lessons: 5,
-        completed: 3,
-        type: 'vocabulary',
-        difficulty: 1,
-        image: '👋',
-        topics: ['Greetings', 'Introductions', 'Politeness']
-      },
-      {
-        id: 2,
-        title: 'Numbers & Counting',
-        description: 'Master French numbers from 1 to 100',
-        level: 'Beginner',
-        duration: '20 min',
-        lessons: 4,
-        completed: 4,
-        type: 'vocabulary',
-        difficulty: 1,
-        image: '🔢',
-        topics: ['Numbers', 'Counting', 'Basic Math']
-      },
-      {
-        id: 3,
-        title: 'Food & Dining',
-        description: 'Learn vocabulary for food, restaurants, and dining',
-        level: 'Intermediate',
-        duration: '25 min',
-        lessons: 6,
-        completed: 2,
-        type: 'vocabulary',
-        difficulty: 2,
-        image: '🍽️',
-        topics: ['Food', 'Restaurants', 'Dining']
-      },
-      {
-        id: 4,
-        title: 'Travel Essentials',
-        description: 'Essential phrases for traveling in French-speaking countries',
-        level: 'Intermediate',
-        duration: '30 min',
-        lessons: 8,
-        completed: 0,
-        type: 'conversation',
-        difficulty: 2,
-        image: '✈️',
-        topics: ['Travel', 'Transportation', 'Tourism']
-      },
-      {
-        id: 5,
-        title: 'Business French',
-        description: 'Professional vocabulary and phrases for the workplace',
-        level: 'Advanced',
-        duration: '40 min',
-        lessons: 10,
-        completed: 0,
-        type: 'business',
-        difficulty: 3,
-        image: '💼',
-        topics: ['Business', 'Workplace', 'Professional']
-      }
-    ],
-    Spanish: [
-      {
-        id: 6,
-        title: 'Spanish Basics',
-        description: 'Learn fundamental Spanish vocabulary and phrases',
-        level: 'Beginner',
-        duration: '15 min',
-        lessons: 5,
-        completed: 1,
-        type: 'vocabulary',
-        difficulty: 1,
-        image: '🇪🇸',
-        topics: ['Basics', 'Greetings', 'Common Phrases']
-      },
-      {
-        id: 7,
-        title: 'Family & Relationships',
-        description: 'Vocabulary for family members and relationships',
-        level: 'Beginner',
-        duration: '20 min',
-        lessons: 4,
-        completed: 0,
-        type: 'vocabulary',
-        difficulty: 1,
-        image: '👨‍👩‍👧‍👦',
-        topics: ['Family', 'Relationships', 'Personal']
-      }
-    ],
-    German: [
-      {
-        id: 8,
-        title: 'German Fundamentals',
-        description: 'Essential German vocabulary and grammar basics',
-        level: 'Beginner',
-        duration: '25 min',
-        lessons: 6,
-        completed: 0,
-        type: 'grammar',
-        difficulty: 1,
-        image: '🇩🇪',
-        topics: ['Basics', 'Grammar', 'Vocabulary']
-      }
-    ]
-  };
+  // Get available languages
+  const availableLanguages = getAvailableLanguages();
 
   const levels = ['all', 'Beginner', 'Intermediate', 'Advanced'];
-  const languages = ['French', 'Spanish', 'German', 'Italian', 'Japanese'];
 
   useEffect(() => {
-    // Simulate API call
+    // Load lessons for selected language and level
+    setLoading(true);
     setTimeout(() => {
-      setLessons(sampleLessons[selectedLanguage] || []);
+      const filteredLessons = getLessonsByLanguage(selectedLanguage, selectedLevel);
+      setLessons(filteredLessons);
       setLoading(false);
-    }, 1000);
-  }, [selectedLanguage]);
+    }, 500);
+  }, [selectedLanguage, selectedLevel]);
 
   const getProgressPercentage = (lesson) => {
     return lesson.lessons > 0 ? Math.round((lesson.completed / lesson.lessons) * 100) : 0;
@@ -206,7 +97,7 @@ const Lessons = () => {
             onChange={(e) => setSelectedLanguage(e.target.value)}
             className="filter-select"
           >
-            {languages.map(lang => (
+            {availableLanguages.map(lang => (
               <option key={lang} value={lang}>{lang}</option>
             ))}
           </select>
@@ -251,7 +142,7 @@ const Lessons = () => {
           <div className="stat-icon">⏱️</div>
           <div className="stat-content">
             <span className="stat-number">
-              {lessons.reduce((total, lesson) => total + lesson.duration.split(' ')[0], 0)}
+              {lessons.reduce((total, lesson) => total + lesson.duration, 0)}
             </span>
             <span className="stat-label">Total Minutes</span>
           </div>
@@ -293,7 +184,7 @@ const Lessons = () => {
                   >
                     {lesson.level}
                   </span>
-                  <span className="duration">{lesson.duration}</span>
+                  <span className="duration">{lesson.duration} min</span>
                   <span className="lessons-count">{lesson.lessons} lessons</span>
                 </div>
 

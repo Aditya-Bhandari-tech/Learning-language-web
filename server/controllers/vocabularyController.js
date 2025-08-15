@@ -471,6 +471,193 @@ const getQuizWords = async (req, res) => {
   }
 };
 
+// @desc    Update vocabulary progress
+// @route   PUT /api/vocabulary/:id/progress
+// @access  Private
+const updateVocabularyProgress = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isCorrect, difficulty } = req.body;
+    const userId = req.user._id;
+
+    const vocabulary = await Vocabulary.findById(id);
+    
+    if (!vocabulary) {
+      return res.status(404).json({
+        success: false,
+        message: 'Vocabulary word not found'
+      });
+    }
+
+    // Initialize learning data if it doesn't exist
+    if (!vocabulary.learningData) {
+      vocabulary.learningData = {
+        timesReviewed: 0,
+        timesCorrect: 0,
+        timesIncorrect: 0,
+        masteryLevel: 0,
+        lastReviewed: null,
+        nextReviewDate: null
+      };
+    }
+
+    // Update learning data
+    vocabulary.learningData.timesReviewed += 1;
+    vocabulary.learningData.lastReviewed = new Date();
+    
+    if (isCorrect) {
+      vocabulary.learningData.timesCorrect += 1;
+      vocabulary.learningData.masteryLevel = Math.min(5, vocabulary.learningData.masteryLevel + 1);
+    } else {
+      vocabulary.learningData.timesIncorrect += 1;
+      vocabulary.learningData.masteryLevel = Math.max(0, vocabulary.learningData.masteryLevel - 1);
+    }
+
+    // Calculate next review date based on mastery level
+    const now = new Date();
+    let nextReviewDays = 1; // Default 1 day
+    
+    if (vocabulary.learningData.masteryLevel >= 3) {
+      nextReviewDays = 3;
+    }
+    if (vocabulary.learningData.masteryLevel >= 5) {
+      nextReviewDays = 7;
+    }
+    
+    vocabulary.learningData.nextReviewDate = new Date(now.getTime() + (nextReviewDays * 24 * 60 * 60 * 1000));
+
+    await vocabulary.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Vocabulary progress updated successfully',
+      vocabulary: vocabulary
+    });
+  } catch (error) {
+    console.error('Update vocabulary progress error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while updating vocabulary progress'
+    });
+  }
+};
+
+// @desc    Get spaced repetition vocabulary
+// @route   GET /api/vocabulary/spaced-repetition
+// @access  Private
+const getSpacedRepetitionVocabulary = async (req, res) => {
+  try {
+    const { limit = 20 } = req.query;
+    const userId = req.user._id;
+
+    // Get vocabulary words that need review based on spaced repetition algorithm
+    const vocabulary = await Vocabulary.aggregate([
+      {
+        $match: {
+          isActive: true,
+          $or: [
+            // Words that haven't been reviewed yet
+            { 'learningData.timesReviewed': { $exists: false } },
+            { 'learningData.timesReviewed': 0 },
+            // Words that need review based on last review date and mastery level
+            {
+              $and: [
+                { 'learningData.timesReviewed': { $gt: 0 } },
+                {
+                  $or: [
+                    // Low mastery words (review more frequently)
+                    {
+                      $and: [
+                        { 'learningData.masteryLevel': { $lt: 3 } },
+                        {
+                          $or: [
+                            { 'learningData.lastReviewed': { $exists: false } },
+                            {
+                              $expr: {
+                                $lt: [
+                                  { $subtract: [new Date(), '$learningData.lastReviewed'] },
+                                  24 * 60 * 60 * 1000 // 1 day in milliseconds
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    // Medium mastery words
+                    {
+                      $and: [
+                        { 'learningData.masteryLevel': { $gte: 3, $lt: 5 } },
+                        {
+                          $or: [
+                            { 'learningData.lastReviewed': { $exists: false } },
+                            {
+                              $expr: {
+                                $lt: [
+                                  { $subtract: [new Date(), '$learningData.lastReviewed'] },
+                                  3 * 24 * 60 * 60 * 1000 // 3 days
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    // High mastery words (review less frequently)
+                    {
+                      $and: [
+                        { 'learningData.masteryLevel': { $gte: 5 } },
+                        {
+                          $or: [
+                            { 'learningData.lastReviewed': { $exists: false } },
+                            {
+                              $expr: {
+                                $lt: [
+                                  { $subtract: [new Date(), '$learningData.lastReviewed'] },
+                                  7 * 24 * 60 * 60 * 1000 // 7 days
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      { $sample: { size: parseInt(limit) } },
+      {
+        $project: {
+          word: 1,
+          translation: 1,
+          partOfSpeech: 1,
+          difficulty: 1,
+          level: 1,
+          examples: { $slice: ['$examples', 1] },
+          pronunciation: 1,
+          learningData: 1
+        }
+      }
+    ]);
+
+    res.status(200).json({
+      success: true,
+      count: vocabulary.length,
+      vocabulary: vocabulary
+    });
+  } catch (error) {
+    console.error('Get spaced repetition vocabulary error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while fetching spaced repetition vocabulary'
+    });
+  }
+};
+
 module.exports = {
   getVocabulary,
   getVocabularyById,
@@ -480,5 +667,7 @@ module.exports = {
   getWordsForReview,
   updateLearningData,
   getVocabularyStats,
-  getQuizWords
+  getQuizWords,
+  getSpacedRepetitionVocabulary,
+  updateVocabularyProgress
 };

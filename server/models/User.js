@@ -2,11 +2,17 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
-  name: {
+  firstName: {
     type: String,
-    required: [true, 'Please provide a name'],
+    required: [true, 'Please provide a first name'],
     trim: true,
-    maxlength: [50, 'Name cannot exceed 50 characters']
+    maxlength: [25, 'First name cannot exceed 25 characters']
+  },
+  lastName: {
+    type: String,
+    required: [true, 'Please provide a last name'],
+    trim: true,
+    maxlength: [25, 'Last name cannot exceed 25 characters']
   },
   email: {
     type: String,
@@ -139,6 +145,11 @@ userSchema.virtual('level').get(function() {
   if (points < 1500) return 3;
   if (points < 3000) return 4;
   return 5;
+});
+
+// Virtual for full name
+userSchema.virtual('name').get(function() {
+  return `${this.firstName} ${this.lastName}`;
 });
 
 // Hash password before saving

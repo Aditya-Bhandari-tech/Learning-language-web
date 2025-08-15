@@ -14,6 +14,9 @@ const { errorHandler } = require('./middleware/errorHandler');
 // Initialize Express app
 const app = express();
 
+// Trust proxy for rate limiting
+app.set('trust proxy', 1);
+
 // Connect to MongoDB
 connectDB();
 
@@ -55,7 +58,7 @@ app.get('/api/health', (req, res) => {
 // Welcome message for root endpoint
 app.get('/', (req, res) => {
   res.json({
-    message: 'Welcome to LinguaLearn API',
+    message: 'Welcome to LangSphere API',
     version: '1.0.0',
     documentation: '/api/docs',
     health: '/api/health'

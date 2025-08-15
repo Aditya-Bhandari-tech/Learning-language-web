@@ -135,7 +135,7 @@ class AuthService {
       const response = await api.put('/auth/profile', userData);
       
       if (response.data.success) {
-        this.setUser(response.data.user);
+        this.setUser(response.data.data.user);
       }
       
       return response.data;
@@ -169,7 +169,7 @@ class AuthService {
       });
       
       if (response.data.success) {
-        this.setUser(response.data.user);
+        this.setUser(response.data.data.user);
       }
       
       return response.data;
@@ -185,7 +185,7 @@ class AuthService {
       const response = await api.delete(`/auth/learning-languages/${language}`);
       
       if (response.data.success) {
-        this.setUser(response.data.user);
+        this.setUser(response.data.data.user);
       }
       
       return response.data;
@@ -223,7 +223,7 @@ class AuthService {
       const response = await api.put('/auth/preferences', preferences);
       
       if (response.data.success) {
-        this.setUser(response.data.user);
+        this.setUser(response.data.data.user);
       }
       
       return response.data;
@@ -239,8 +239,8 @@ class AuthService {
       const response = await api.post('/auth/refresh-token');
       
       if (response.data.success) {
-        this.setToken(response.data.token);
-        this.setUser(response.data.user);
+        this.setToken(response.data.data.token);
+        this.setUser(response.data.data.user);
       }
       
       return response.data;
